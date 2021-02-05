@@ -1,9 +1,14 @@
 const express = require("express");
+const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken");
+
 const jwtPrivateKey = "secretKey";
 const jwtAlgorithm = "HS256";
 const jwtExpiredIn = "30s";
+
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 
 app.get("/api", (req, res) => {
   res.json({
@@ -26,7 +31,7 @@ app.post("/api/login", (req, res) => {
 
   jwt.sign({ user: user }, jwtPrivateKey,{algorithm:jwtAlgorithm,expiresIn:jwtExpiredIn}, (err, token) => {
     //   console.log(token);
-    res.json({
+    res.status(200).json({
       token: token,
     });
   });
@@ -44,7 +49,7 @@ function verifyToken(req, res, next) {
   jwt.verify(token,jwtPrivateKey, (err, decoded) => {
       console.log(decoded);
     if (err) {
-      res.sendStatus("403");
+      res.sendStatus("403").json({message:err});
     } else {
       next();
     }
